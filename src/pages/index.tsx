@@ -6,14 +6,13 @@ import { api } from "~/utils/api";
 import relativeTime from "dayjs/plugin/relativeTime";
 import type { RouterOutputs } from "~/utils/api";
 import Image from "next/image";
+import { LoadingPage } from "~/components/Loading";
 
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
   const { user } = useUser();
   if (!user) return null;
-
-  console.log(user);
 
   return (
     <div className="flex w-full gap-3">
@@ -58,16 +57,31 @@ const PostView = (props: PostWithUser) => {
   );
 };
 
-const Home: NextPage = () => {
-  const user = useUser();
+const Feed = () => {
+  const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
 
-  const { data, isLoading } = api.posts.getAll.useQuery();
+  if (postsLoading) return <LoadingPage />;
+
+  if (!data) return <div>something went wrong</div>;
+
+  return (
+    <div className="flex flex-col">
+      {data.map((fullPost) => (
+        <PostView key={fullPost.post.id} {...fullPost} />
+      ))}
+    </div>
+  );
+};
+
+const Home: NextPage = () => {
+  const { isLoaded: userLoaded, isSignedIn } = useUser();
+
+  // start fetching asap
+  api.posts.getAll.useQuery();
   // TRPC lets you create server functions that run on a server (eg. vercel).
   // Then we can get the data.
   // Never want user to directly connect to a db.
-
-  if (!data) return <div> no data</div>;
-  if (isLoading) return <div> loading</div>;
+  if (!userLoaded) return <div />;
 
   return (
     <>
@@ -79,19 +93,14 @@ const Home: NextPage = () => {
       <main className="flex h-screen justify-center">
         <div className="h-full w-full border-x border-slate-400 md:max-w-2xl">
           <div className="flex border-b border-slate-400 p-4">
-            {!user.isSignedIn && (
+            {!isSignedIn && (
               <div className="flex justify-center">
                 <SignInButton />
               </div>
             )}
-            {user.isSignedIn && <CreatePostWizard />}
+            {isSignedIn && <CreatePostWizard />}
           </div>
-          <div className="flex flex-col">
-            {data?.map((fullPost) => (
-              <PostView key={fullPost.post.id} {...fullPost} />
-            ))}
-          </div>
-          <SignIn path="/sign-in" routing="path" signUpUrl="/sign-up" />
+          <Feed />
         </div>
       </main>
     </>
