@@ -1,4 +1,4 @@
-import clerkClient, { User } from "@clerk/clerk-sdk-node";
+import clerkClient, { type User } from "@clerk/clerk-sdk-node";
 import { TRPCError } from "@trpc/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";

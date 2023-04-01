@@ -1,6 +1,6 @@
 import React from "react";
 
-export const Loading: React.FC = (props: { size?: number }) => {
+export const LoadingSpinner = (props: { size?: number }) => {
   return (
     <div role="status">
       <svg
@@ -29,7 +29,7 @@ export const Loading: React.FC = (props: { size?: number }) => {
 export const LoadingPage = () => {
   return (
     <div className="absolute top-0 right-0 flex h-screen w-screen items-center justify-center">
-      <Loading />
+      <LoadingSpinner />
     </div>
   );
 };
