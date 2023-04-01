@@ -3,7 +3,6 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import dayjs from "dayjs";
 import { api } from "~/utils/api";
-import relativeTime from "dayjs/plugin/relativeTime";
 import type { RouterOutputs } from "~/utils/api";
 import Image from "next/image";
 import { LoadingPage, LoadingSpinner } from "~/components/Loading";
@@ -12,8 +11,6 @@ import { toast } from "react-hot-toast";
 import Link from "next/link";
 import { PageLayout } from "~/components/layout";
 import { Feed } from "~/components/postview";
-
-dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
   const { user } = useUser();
