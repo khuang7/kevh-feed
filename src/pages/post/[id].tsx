@@ -1,31 +1,78 @@
-import { useUser } from "@clerk/nextjs";
-import { type NextPage } from "next";
+import { type GetStaticProps } from "next";
+
+import type { NextPage } from "next";
+
 import Head from "next/head";
-import dayjs from "dayjs";
 import { api } from "~/utils/api";
-import type { RouterOutputs } from "~/utils/api";
 import Image from "next/image";
+import { generateSSGHelper } from "~/server/api/ssgHelper";
+import { PageLayout } from "~/components/layout";
+import { PostView } from "~/components/postview";
+import { LoadingPage } from "~/components/Loading";
 
-const SinglePostPage: NextPage = () => {
-  const { isLoaded: userLoaded, isSignedIn } = useUser();
+const ProfileFeed = (props: { userId: string }) => {
+  const { data, isLoading } = api.posts.getPostsByUserId.useQuery({
+    userId: props.userId,
+  });
 
-  // start fetching asap
-  api.posts.getAll.useQuery();
-  // TRPC lets you create server functions that run on a server (eg. vercel).
-  // Then we can get the data.
-  // Never want user to directly connect to a db.
-  if (!userLoaded) return <div />;
+  if (isLoading) return <LoadingPage />;
+
+  if (!data || data.length === 0) return <div>no posts</div>;
+
+  return (
+    <div className="flex flex-col">
+      {data.map((fullPost) => {
+        return <PostView {...fullPost} key={fullPost.post.id} />;
+      })}
+      ;
+    </div>
+  );
+};
+
+const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
+  const { data } = api.posts.getById.useQuery({
+    id,
+  });
+
+  if (!data) return <div> no data</div>;
 
   return (
     <>
       <Head>
-        <title>Post</title>
+        <title>{`${data.post.content} - ${data.author.username}`}</title>
       </Head>
-      <main className="flex h-screen justify-center">
-        <div> post page</div>
-      </main>
+      <PageLayout>
+        <PostView {...data} />
+      </PageLayout>
     </>
   );
+};
+
+export const getStaticProps: GetStaticProps = async (context) => {
+  const ssg = generateSSGHelper();
+
+  const id = context.params?.id;
+
+  if (typeof id !== "string") throw new Error("no id");
+
+  // fetch data ahead of time and rehyrdate it for server side props.
+  await ssg.posts.getById.prefetch({ id });
+
+  return {
+    props: {
+      // takes all thiungs we fetch and puts its in a shape that can be used by react-query
+      //
+      trpcState: ssg.dehydrate(),
+      id,
+    },
+  };
+};
+
+// reason for getstaticpaths
+// we need to know what pages to generate at build time
+
+export const getStaticPaths = () => {
+  return { paths: [], fallback: "blocking" };
 };
 
 export default SinglePostPage;
