@@ -15,28 +15,59 @@ type PostWithUser = RouterOutputs["posts"]["getAll"][number];
 export const PostView = (props: PostWithUser) => {
   const { post, author } = props;
   return (
-    <div className="flex gap-3 border-b border-slate-400 p-4" key={post.id}>
-      <Image
-        src={author.profileImageUrl}
-        alt="Profile Image"
-        className="h-14 w-14 rounded-full"
-        width={56}
-        height={56}
-      />
-      <div className="flex flex-col">
-        <div className="flex gap-1">
-          <Link href={`/@${author.username}`}>
-            <span className="text-slate-300">{`@${author.username}`}</span>
-          </Link>
-          <Link href={`/post/${post.id}`}>
-            <span className="font-thin">{` · ${dayjs(
-              post.createdAt
-            ).fromNow()}`}</span>
-          </Link>
+    <Link href={`/@${author.username}`}>
+      <div className="px-6">
+        <div className="rounded-xl bg-gray-800 p-4">
+          <div
+            className="
+      cursor-pointer 
+      p-5 
+      transition 
+      hover:opacity-80
+    "
+          >
+            <div className="flex flex-row items-start gap-3">
+              <Image
+                src={author.profileImageUrl}
+                alt="Profile Image"
+                className="h-14 w-14 rounded-full"
+                width={56}
+                height={56}
+              />
+              <div>
+                <div className="flex flex-row items-center gap-2">
+                  <p
+                    className="
+              cursor-pointer 
+              font-semibold 
+              text-white 
+              hover:underline
+          "
+                  >
+                    @{author.username}
+                  </p>
+                  <span
+                    className="
+              hidden
+              cursor-pointer
+              text-neutral-500
+              hover:underline
+              md:block
+          "
+                  >
+                    {/* @{author.username} */}
+                  </span>
+                  <span className="text-sm text-neutral-500">{`${dayjs(
+                    post.createdAt
+                  ).fromNow()}`}</span>
+                </div>
+                <div className="text-white">{post.content}</div>
+              </div>
+            </div>
+          </div>
         </div>
-        <span>{post.content}</span>
       </div>
-    </div>
+    </Link>
   );
 };
 
@@ -48,7 +79,7 @@ export const Feed = () => {
   if (!data) return <div>something went wrong</div>;
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-2">
       {data.map((fullPost) => (
         <PostView key={fullPost.post.id} {...fullPost} />
       ))}

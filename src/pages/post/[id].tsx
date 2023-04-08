@@ -9,6 +9,7 @@ import { generateSSGHelper } from "~/server/api/ssgHelper";
 import { PageLayout } from "~/components/layout";
 import { PostView } from "~/components/postview";
 import { LoadingPage } from "~/components/Loading";
+import { Layout3 } from "~/components/Layout3";
 
 const ProfileFeed = (props: { userId: string }) => {
   const { data, isLoading } = api.posts.getPostsByUserId.useQuery({
@@ -41,9 +42,9 @@ const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
       <Head>
         <title>{`${data.post.content} - ${data.author.username}`}</title>
       </Head>
-      <PageLayout>
+      <Layout3>
         <PostView {...data} />
-      </PageLayout>
+      </Layout3>
     </>
   );
 };
